@@ -22,7 +22,9 @@ public class Main {
         };
 
         BankersAlgorithm bankers = new BankersAlgorithm(allocation, max, available);
-        bankers.safety_check_bankers();
+        SafetyResult result = bankers.safety_check_bankers();
+
+        System.out.println(result + Arrays.toString(result.safeSequence()));
     }
 
 }
