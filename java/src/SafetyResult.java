@@ -7,6 +7,6 @@ public record SafetyResult(
     }
 
     public static SafetyResult unSafe() {
-        return new SafetyResult(false, new int[0]);
+        return new SafetyResult(false, null);
     }
 }
