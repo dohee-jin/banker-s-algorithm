@@ -12,17 +12,21 @@ public class BankersAlgorithm {
         int row = max.length;
         int column = max[0].length;
 
-        this.max = max;
-        this.allocation = allocation;
-
-        this.available = available;
-
+        this.max = new int[row][column];
+        this.allocation = new int[row][column];
+        this.available = available.clone();
         this.need = new int[row][column];
 
-        /*
-        need = max - allocation
-         */
         for(int i = 0; i < row; i++) {
+            /*
+            allocation, max 배열 깊은 복사
+             */
+            this.allocation[i] = allocation[i].clone();
+            this.max[i] = max[i].clone();
+
+            /*
+            need = max - allocation
+             */
             for(int j = 0; j < max[i].length; j++) {
                 need[i][j] = max[i][j] - allocation[i][j];
             }
@@ -30,7 +34,7 @@ public class BankersAlgorithm {
     }
 
     /**
-     * Safe State를 판단하는 함수
+     * Safe State를 판단하는 메소드
      *
      * ====== Safe State Check 알고리즘 순서 ======
      * 1. work = available;
@@ -89,7 +93,7 @@ public class BankersAlgorithm {
 
 
     /**
-     * request 요청 시 safe state를 확인하고 요청을 허용할 지 거부할 지 판단하는 함수
+     * request 요청 시 safe state를 확인하고 요청을 허용할 지 거부할 지 판단하는 메소드
      * @param process 몇 번 프로세스의 요청인지 확인하기 위한 파라미터
      * @param request 프로세스의 자원 요청 값
      *
@@ -153,10 +157,14 @@ public class BankersAlgorithm {
             available = availableCopy;
             need = needCopy;
             System.out.println("[거절] P" + process + " 요청 " + Arrays.toString(request) + ": 요청을 허용하면 unsafe 상태");
+            return new RequestResult(RequestResult.RequestStates.DENIED, null);
         }
 
         System.out.println("[승인] P" + process + " 요청 " + Arrays.toString(request) + ": 요청을 허용해도 시스템이 safe 상태 유지");
 
-        return safetyResult.safeState() ? RequestResult.granted(RequestResult.RequestStates.GRANTED, safetyResult.safeSequence().clone()) : new RequestResult(RequestResult.RequestStates.DENIED, null);
+        /*
+        RequestResult의 요청 상태를 허용(GRANTED), safeSequence를 반환한다.
+         */
+        return RequestResult.granted(RequestResult.RequestStates.GRANTED, safetyResult.safeSequence().clone());
     }
 }

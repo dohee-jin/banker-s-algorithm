@@ -50,7 +50,7 @@ public class Main {
             System.out.println("P0 요청 " + Arrays.toString(req2) + " 거절");
         }
 
-        // Safe Resource Request 테스트 (P0이 [4, 0, 0] 요청)
+        // Safe Resource Request 테스트 (P1이 [2, 0, 0] 요청)
         int[] req3 = {2, 0, 0};
         RequestResult res3 = bankers.resourceRequestBankers(1, req3);
 
