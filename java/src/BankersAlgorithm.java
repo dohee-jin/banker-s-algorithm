@@ -1,8 +1,12 @@
+import java.util.Arrays;
+
 public class BankersAlgorithm {
 
     int [][] allocation;
     int [][] max;
     int [] available;
+    int [][] need;
+
 
     public BankersAlgorithm(int[][] allocation, int[][] max, int[] available) {
         int row = max.length;
@@ -12,18 +16,32 @@ public class BankersAlgorithm {
         this.allocation = allocation;
 
         this.available = available;
+
+        this.need = new int[row][column];
+
+        /*
+        need = max - allocation
+         */
+        for(int i = 0; i < row; i++) {
+            for(int j = 0; j < max[i].length; j++) {
+                need[i][j] = max[i][j] - allocation[i][j];
+            }
+        }
     }
 
     /**
      * Safe State를 판단하는 함수
+     *
+     * ====== Safe State Check 알고리즘 순서 ======
      * 1. work = available;
      * 2. finish[i] = false;
      * 3. finish[i] = false && need[i] < work
      * 4. i번 프로세스 종료 후 work = work + allocation, finish[i] = true;
      * 5. finish[i] 가 모두 true 이면 safe state, safe sequence를 반환
+     *
      * @return safe state 여부를 판단하여 SafetyResult를 반환
      */
-    public SafetyResult safety_check_bankers(int[][] allocation, int[] available, int[][] need) {
+    public SafetyResult safetyCheckBankers() {
         int [] sequence = new int[max.length];
         boolean[] finish = new boolean[max.length];
 
@@ -69,19 +87,24 @@ public class BankersAlgorithm {
         return SafetyResult.unSafe();
     }
 
+
     /**
      * request 요청 시 safe state를 확인하고 요청을 허용할 지 거부할 지 판단하는 함수
      * @param process 몇 번 프로세스의 요청인지 확인하기 위한 파라미터
      * @param request 프로세스의 자원 요청 값
+     *
+     * ====== Resource Request 요청 처리 알고리즘 순서 ======
      * 1. request[i] <= need[i];
      * 2. request[i] <= available[i];
-     * 3. available = available - request (복사본이어야함)
+     * 3. available = available - request
      * 4. allocation = allocation + request
      * 5. need = need - request
      * 6. safety_check_bankers() 실행
+     * 7. 결과값에 따라 safe, unsafe 상태 반환, unsafe 상태면 allocation, available, need 롤백
+     *
      * @return RequestResult
      */
-    public RequestResult resource_request_bankers(int process, int[] request, int[][] need) {
+    public RequestResult resourceRequestBankers(int process, int[] request) {
 
         // 0. available, allocation, need 배열 복사
         int[] availableCopy = available.clone();
@@ -95,7 +118,8 @@ public class BankersAlgorithm {
 
         // 1. request[i] <= need[i];
         for(int i = 0; i < request.length; i++) {
-            if(request[i] > needCopy[process][i]) {
+            if(request[i] > need[process][i]) {
+                System.out.println("[거절] P" + process + " 요청 " + Arrays.toString(request) + ": 요청 자원이 최대 요구량을 초과함");
                 return new RequestResult(RequestResult.RequestStates.INVALID, null);
             }
         }
@@ -103,24 +127,35 @@ public class BankersAlgorithm {
         // 2. request[i] <= available[i]
         for(int i = 0; i < request.length; i++) {
             if(request[i] > available[i]) {
+                System.out.println("[거절] P" + process + " 요청 " + Arrays.toString(request) + ": 현재 가용 자원이 부족함");
                 return new RequestResult(RequestResult.RequestStates.WAIT, null);
             }
             // 3. available = available - request
-            availableCopy[i] = availableCopy[i] - request[i];
+            available[i] = available[i] - request[i];
         }
 
         // 4. allocation = allocation + request
         for(int i = 0; i < request.length; i++) {
-            allocationCopy[process][i] = allocationCopy[process][i] + request[i];
+            allocation[process][i] = allocation[process][i] + request[i];
         }
 
         // 5. need = need - request
         for(int i = 0; i < request.length; i++) {
-            needCopy[process][i] -= request[i];
+            need[process][i] -= request[i];
         }
 
         // 6. safety_check_bankers()
-        SafetyResult safetyResult = safety_check_bankers(allocationCopy, availableCopy, needCopy);
+        SafetyResult safetyResult = safetyCheckBankers();
+
+        // 7. safetyResult 값에 따라 safe unsafe 상태면 롤백
+        if(!safetyResult.safeState()) {
+            allocation = allocationCopy;
+            available = availableCopy;
+            need = needCopy;
+            System.out.println("[거절] P" + process + " 요청 " + Arrays.toString(request) + ": 요청을 허용하면 unsafe 상태");
+        }
+
+        System.out.println("[승인] P" + process + " 요청 " + Arrays.toString(request) + ": 요청을 허용해도 시스템이 safe 상태 유지");
 
         return safetyResult.safeState() ? RequestResult.granted(RequestResult.RequestStates.GRANTED, safetyResult.safeSequence().clone()) : new RequestResult(RequestResult.RequestStates.DENIED, null);
     }

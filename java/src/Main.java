@@ -21,26 +21,44 @@ public class Main {
                 {4, 3, 3}
         };
 
-        int[][] need = new int[max.length][max[0].length];
-
-        /*
-        need = max - allocation
-         */
-        for(int i = 0; i < max.length; i++) {
-            for(int j = 0; j < max[i].length; j++) {
-                need[i][j] = max[i][j] - allocation[i][j];
-            }
-        }
-        int[] request = {1, 0, 2};
-        System.out.println("need = " + Arrays.deepToString(need));
-
+        // BankersAlgorithm 객체 생성
         BankersAlgorithm bankers = new BankersAlgorithm(allocation, max, available);
 
-        SafetyResult result1 = bankers.safety_check_bankers(allocation, available, need);
-        System.out.println("safe state: "+ result1 + Arrays.toString(result1.safeSequence()));
+        // Safety Check 테스트
+        SafetyResult res = bankers.safetyCheckBankers();
+        System.out.println("Safe State: " + res.safeState());
+        System.out.println("Safe Sequence: " +
+                Arrays.toString(res.safeSequence()));
 
-        RequestResult result2 = bankers.resource_request_bankers(1, request, need);
-        System.out.println("result = " + result2.state() + Arrays.toString(result2.safeSequence()));
+        // Safe Resource Request 테스트 (P1이 [1, 0, 2] 요청)
+        int[] req1 = {1, 0, 2};
+        RequestResult res1 = bankers.resourceRequestBankers(1, req1);
+
+        if(res1.state() == RequestResult.RequestStates.GRANTED) {
+            System.out.println("P1 요청 " + Arrays.toString(req1) + " 승인, new safe sequence: "+ Arrays.toString(res1.safeSequence()));
+        } else {
+            System.out.println("P1 요청 " + Arrays.toString(req1) + "거절");
+        }
+
+        // Safe Resource Request 테스트 (P0이 [4, 0, 0] 요청)
+        int[] req2 = {4, 0, 0};
+        RequestResult res2 = bankers.resourceRequestBankers(0, req2);
+
+        if(res2.state() == RequestResult.RequestStates.GRANTED) {
+            System.out.println("P0요청 " + Arrays.toString(req2) + " 승인, new safe sequence: "+ Arrays.toString(res2.safeSequence()));
+        } else {
+            System.out.println("P0 요청 " + Arrays.toString(req2) + " 거절");
+        }
+
+        // Safe Resource Request 테스트 (P0이 [4, 0, 0] 요청)
+        int[] req3 = {2, 0, 0};
+        RequestResult res3 = bankers.resourceRequestBankers(1, req3);
+
+        if(res3.state() == RequestResult.RequestStates.GRANTED) {
+            System.out.println("P1요청 " + Arrays.toString(req3) + " 승인, new safe sequence: "+ Arrays.toString(res3.safeSequence()));
+        } else {
+            System.out.println("P1 요청 " + Arrays.toString(req3) + " 거절");
+        }
 
     }
 
