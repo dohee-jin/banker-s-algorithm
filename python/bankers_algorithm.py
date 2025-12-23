@@ -23,6 +23,8 @@ class BankersAlgorithm:
 
         자바는 리턴할 때 한 가지만 리턴할 수 있어 새로운 클래스를 사용하게 되는데? dto로 
         파이썬은 return 값1, 값2, ... 이렇게 여러가지를 튜플로 리턴할 수 있다.
+
+        포문 인덱스 , 값 동시에 사용 enumerate()
  
     """
     """
@@ -56,7 +58,7 @@ class BankersAlgorithm:
      4. i번 프로세스 종료 후 work = work + allocation, finish[i] = true;
      5. finish[i] 가 모두 true 이면 safe state, safe sequence를 반환
      
-     safe state 여부를 판단하여 SafetyResult를 반환
+     return: safe state, SafetyResult
 
      * 깊은 복사 deepcopy 사용을 위해 copy 모듈을 import 함
      
@@ -117,8 +119,68 @@ class BankersAlgorithm:
         # unsafe 상태를 나타내는 False 값만 리턴한다.
         return False
     
+
+    """
+     request 요청 시 safe state를 확인하고 요청을 허용할 지 거부할 지 판단하는 메소드
+     :param process: 몇 번 프로세스의 요청인지 확인하기 위한 파라미터
+     :param request: 프로세스의 자원 요청 값
+     
+     ====== Resource Request 요청 처리 알고리즘 순서 ======
+     1. request[i] <= need[i];
+     2. request[i] <= available[i];
+     3. available = available - request
+     4. allocation = allocation + request
+     5. need = need - request
+     6. safety_check_bankers() 실행
+     7. 결과값에 따라 safe, unsafe 상태 반환, unsafe 상태면 allocation, available, need 롤백
+
+     return: 
+    """
     def resource_request_bankers(self, process, request):
-        print("ddd")
+
+        # 1. 기본 조건 체크
+        for i, value in enumerate(request) :
+            
+            # 1-1. request[i][j] <= need[process][i]
+            # 요청 리소스가 프로세스의 최대 요구량 보다 많을 경우, 요청을 거부한다.
+            if value > self.need[process][i] :
+                return False, "요청 자원이 최대 요구량을 초과함"
+            
+            
+            # 1-2. request[i][j] <= availalbe[i]
+            # 요청 리소스가 현재 가용 자원 보다 많을 경우, 요청을 거부한다.
+            if value > self.available[i] : 
+                return False, "현재 가용 자원이 부족함"
+            
+        # 2. 가상 할당
+        # 기본 조건 체크를 통과한 경우 safety_check_bankers() 검사 전 가상 할당을 진행한다.
+        # 2-1. 가상 할당 전 원본 상태 백업
+        # saftey_check_bankers() 가 unsafe일 경우 롤백
+        old_available = self.available[:]
+        old_allocation = [i[:] for i in self.allocation]
+        old_need = [i[:] for i in self.need]
+
+        # 2-2. 가상 할당 진행
+        for idx, value in enumerate(request):
+            self.available[idx] -= value
+            self.allocation[process][idx] += value
+            self.need[process][idx] -= value
+        
+        # 3. safety_check_bankers() 실행
+        is_safe, sequence = self.sefety_check_bankers()
+
+        # 4. 결과값 확인
+        if is_safe :
+            return is_safe, sequence
+        
+        else :
+            self.available = old_available
+            self.allocation = old_allocation
+            self.need = old_need
+            return False, "unsafe 상태로 요청이 거절됨"
+
+
+            
 
 
  
@@ -141,11 +203,28 @@ maximum = [
 available = [3, 3, 2]
 
 bank1 = BankersAlgorithm(allocation, available, maximum)
-print("===== need ===== \n")
-print(bank1.need)
+print("===== need ===== ")
+print(bank1.need, " \n")
 
-print("===== safe stae 검사 ===== \n")
-is_safe, sequence = bank1.sefety_check_bankers()
-print(f"Safe: {is_safe}, Sequence: {sequence}")
+print("===== safe stae 검사 =====")
+safe, sequence = bank1.sefety_check_bankers()
+print(f"Safe: {safe}, Sequence: {sequence} \n")
+
+p1 = 1
+print(f"===== resource request: {p1} =====")
+req1 = [1, 0, 2]
+safe, res1 = bank1.resource_request_bankers(p1, req1)
+print(f"Safe: {safe}, {"sequence" if safe else "result"}: {res1} \n")
    
+p2 = 0
+print(f"===== resource request: {p2} =====")
+req2 = [4, 0, 0]
+safe, res2 = bank1.resource_request_bankers(p2, req2)
+print(f"Safe: {safe}, {"sequence" if safe else "result"}: {res2} \n")
+
+p3 = 1
+print(f"===== resource request: {p3} =====")
+req3 = [2, 0, 0]
+safe, res3 = bank1.resource_request_bankers(p3, req3)
+print(f"Safe: {safe}, {"sequence" if safe else "result"}: {res3} \n")
 

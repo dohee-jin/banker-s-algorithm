@@ -2,7 +2,7 @@
 
 ## Banker's Algorithm이란?
 
-교착상태(데드락) 회피를 위한 알고리즘 중 하나로 디익스트라가 고안한 알고리즘이다. banker's algorithm은 Safety, Resource Request 두 개의 알고리즘으로 구성되어 있다.     
+교착상태(데드락) 회피를 위한 알고리즘 중 하나로 다익스트라가 고안한 알고리즘이다. banker's algorithm은 Safety, Resource Request 두 개의 알고리즘으로 구성되어 있다.     
 
 운영체제개론 기말 과제로 Banker's Algorithm을 자바와 파이썬으로 구현했다.
 
