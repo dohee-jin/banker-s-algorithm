@@ -63,6 +63,43 @@ Resource Request Algorithm은 자원 요청 시 상태를 확인하여 요청의
 
 ### python 구현
 
+파이썬 구현은 vscode, python 3.12.5 버전을 사용하여 구현했다. 파이썬 구현은 파이썬 언어 특유의 간결한 문법과 직관적인 코드로 구현하였다.
+
+#### 1. bankers_algorithm.py
+파이썬 코드는 bankers_algorithm.py 파일 안에서 모든 코드를 작성했으며 파이썬 역시 자바 처럼 모듈 별로 코드를 나눠서 작성하는 것을 더 선호한다고 한다. 모듈 별로 분리를 하게 되면 재사용성이 좋아진다.   
+
+파이썬 코드 내에서 BankersAlgorithm을 아래와 같이 작성하고, safety_check_bankers(), resource_request_bankers() 도 클래스 내부의 메소드로 작성했다. >> [bankers_algorithm.py](/python/bankers_algorithm.py)
+```
+class BankersAlgorithm:
+~ 내용 작성 
+```
+
+내가 구현한 파이썬 코드와 자바 코드의 가장 큰 차이점은 for문이라고 생각한다. 파이썬 코드에서 2차원 배열의 깊은 복사를 진행할 때 리스트 컨프리헨션을 사용하여 자바보다 짧고 간편하게 코드를 작성했다.   
+```
+finish = [False for i in range(len(self.maximum))]
+work = [work[j] + allocation[i][j] for j in range(len(work))]
+.
+.
+.
+```
+또한 파이썬 구현에서는 return에 값을 여러개 주어 반환하게 했는데 return은 튜플을 반환하기 때문에 여러개의 결과값들을 반환하는 것 처럼 느껴진다. 실제로는 하나의 튜플을 반환한다. 튜플은 순서가 있는 자료구조로 아래 함수의 리턴값을 여러개의 변수로 받거나(튜플 언패킹), 또는 하나의 튜플로 받아 인덱스로 접근할 수 있다
+```
+def safety_check_bankers(self, . . . ):
+    return True, "python"
+-> True -> 튜플의 인덱스 0
+-> "python" -> 튜플의 인덱스 1
+
+isSafe, text = safety_check_bankers()
+isSafe = return 튜플의 [0], True
+text = return 튜플의 [1]. "python"
+
+result = safety_check_bankers()
+result[0] -> True
+result[1] -> "python"
+```
+
+파이썬 구현에서 결과값으로 튜플을 사용한 이유는 다음과 같다.   
+튜플은 서로 다른 타입(boolean, String)을 함께 반환하고 immutable(불변성)한 자료형이며, 결과값을 리스트, 딕셔너리 등 다른 자료형보다 속도가 빠르다. 튜플을 사용하여 여러 타입의 값들을 의미있는 하나의 결과값으로 반환하고 불변하여 안전하게 결과값을 전달했다.
 --- 
 
 ### java 구현
@@ -82,7 +119,12 @@ BankersAlogrithm의 두가지 알고리즘을 수행할 클래스로 메인에�
 ---
 
 ### 알고리즘 구현을 통해 배운점
-#### 1. 파이썬
+#### 1. 파이썬   
+2학년 1학기의 파이썬 강의를 통해 파이썬에 대해 배웠었다. BankersAlgorithm을 파이썬으로 구현하면서 1학기 때 배운 파이썬의 클래스 생성, 리스트 컨프리헨션, mutable, immutable 등에 대해 복습하였다.   
+
+1. 파이썬 클래스의 특징   
+
+
 #### 2. 자바
 KDT 과정을 통해 자바와 스프링, 객체지향에 대해 배웠다. 이번 과제는 학교 운영체제개론 기말 과제였는데 과제 구현을 통해 자바를 복습할 수 있게 되었다.   
 
